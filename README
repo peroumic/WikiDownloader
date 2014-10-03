@@ -1,1 +1,5 @@
-This file was created by IntelliJ IDEA 12.1.4 for binding GitHub repository
+example arguments:
+pathToLinks numberOfThreads language(folder which will be created next to the pathToLinks)
+C:\WIKI2\cs.links.txt 8 CS
+
+if program is closed and will start again it will replace current files so rename language option or save downloaded data somewhere else (TODO)
