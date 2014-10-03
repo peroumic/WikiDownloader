@@ -3,3 +3,7 @@ pathToLinks numberOfThreads language(folder which will be created next to the pa
 C:\WIKI2\cs.links.txt 8 CS
 
 if program is closed and will start again it will replace current files so rename language option or save downloaded data somewhere else (TODO)
+
+How to run
+Just download jar and write to console somethink like that
+java -jar WikiDownload2.jar C:\WIKI2\cs.links.txt 8 CS
