@@ -21,11 +21,11 @@ public class DownloadWiki {
     protected long readBytes = 0;
     protected String language = "cs";
     protected List<File> files;
-
+    protected long startTime = 0;
 
     public DownloadWiki(int threads, String inputFilePath,String language) throws FileNotFoundException {
         this.threads = threads;
-
+        this.startTime = System.currentTimeMillis();
         this.files = new ArrayList<File>();
         File f = new File( inputFilePath );
         if ( f . isDirectory() )
@@ -62,6 +62,50 @@ public class DownloadWiki {
         return outputFolderPath;
     }
 
+    public long getReadBytes() {
+        return readBytes;
+    }
+
+    public void setReadBytes(long readBytes) {
+        this.readBytes = readBytes;
+    }
+
+    public void setCounter(long counter) {
+        this.counter = counter;
+    }
+
+    public long getCounter() {
+        return counter;
+    }
+
+    public double getSpeed () {
+        return (System.currentTimeMillis() - startTime)/getCounter();
+    }
+
+    public double getDuration () {
+        return ( System.currentTimeMillis() - startTime ) * (this.bytes - getReadBytes())/getReadBytes();
+    }
+
+    public void printStats(){
+        double duration = getDuration();
+        char mode = 's';
+        if ( duration/1000d > 300 && duration/1000d <= 900 ) {
+            mode = 'm';
+            duration /= 60;
+        } else if ( duration/1000d > 900 ) {
+            duration /= 3600;
+            mode = 'h';
+        }
+
+        System.out.format("\r%d%% [%d/%d] %.4f l/s. Remaining %.2f%c.", (int)(getReadBytes() * 100 / (float)this.bytes),
+                getReadBytes(),
+                this.bytes,
+                getSpeed()/1000d,
+                duration/1000d,
+                mode );
+    }
+
+
     public synchronized List<String> getLinks(int i) throws IOException {
         String line;
         List<String> list = new ArrayList<String>();
@@ -82,14 +126,11 @@ public class DownloadWiki {
             if ( line == null )
                 break;
             list.add(line);
-            this.readBytes += line.getBytes("UTF-8").length + 2;
             y++;
         }
         if (list.size() == 0) {
             return null;
         }
-        counter+=list.size();
-        System.out.format("%d%% [%d/%d]\r\n", (int)(this.readBytes * 100 / (float)this.bytes), this.readBytes, this.bytes);
         return list;
     }
 
@@ -108,10 +149,13 @@ public class DownloadWiki {
         File [] fp = folder.listFiles();
         File finalFile = new File ( getOutputFolderPath() + "\\" + this . language + ".txt" );
         FileOutputStream fos;
+        System.out.println("Merging");
         try {
             fos = new FileOutputStream(finalFile, true);
             for ( File localFile : fp )
             {
+                if ( localFile . getName() .contains( this.language + ".txt" ) )
+                    continue;
                 FileInputStream fis = new FileInputStream(localFile);
                 byte[] buffer = new byte[8192];
                 int count;
