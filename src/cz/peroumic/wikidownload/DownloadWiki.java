@@ -66,11 +66,13 @@ public class DownloadWiki {
         return readBytes;
     }
 
-    public synchronized void addReadBytes(long readBytes) {
-        this.readBytes = readBytes + this.readBytes;
+    public void addReadBytes(long readBytes) {
+        this.readBytes += readBytes;
     }
 
-    public synchronized void addCounter(long counter) {this.counter = counter + this .counter;}
+    public synchronized void addCounter(long counter) {
+        this.counter += counter;
+    }
 
     public long getCounter() {
         return counter;
