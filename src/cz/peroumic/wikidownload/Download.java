@@ -47,7 +47,6 @@ public class Download implements Runnable {
                     String g = "\r\n";
                     downloadWiki.addReadBytes( link . getBytes() . length + g . getBytes() . length );
                     downloadWiki.addCounter(1);
-                    downloadWiki.printStats();
                 }
             }
             writer.close();

@@ -70,7 +70,7 @@ public class DownloadWiki {
         this.readBytes += readBytes;
     }
 
-    public synchronized void addCounter(long counter) {
+    public  void addCounter(long counter) {
         this.counter += counter;
     }
 
@@ -132,6 +132,7 @@ public class DownloadWiki {
         if (list.size() == 0) {
             return null;
         }
+        printStats();
         return list;
     }
 
