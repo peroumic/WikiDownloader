@@ -1,3 +1,11 @@
+5. 10. 2014
+Changes:
+- pathToLinks can be a directory. If it is a directory, program will process all of the files in there
+- if program is interrupted and then run again, it will append all processed content to the previous existing files
+- program merges all the files produces by his threads to one file, if this file exists, it will append the content
+
+4. 10. 2014
+
 example arguments:
 pathToLinks numberOfThreads language(folder which will be created next to the pathToLinks)
 C:\WIKI2\cs.links.txt 8 CS
@@ -7,3 +15,5 @@ if program is closed and will start again it will replace current files so renam
 How to run
 Just download jar and write to console somethink like that
 java -jar WikiDownload2.jar C:\WIKI2\cs.links.txt 8 CS
+
+
