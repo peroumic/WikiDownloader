@@ -47,7 +47,6 @@ public class Download implements Runnable {
                     downloadWiki.setCounter(downloadWiki.getCounter() + 1);
                     downloadWiki.printStats();
                 }
-                System.out.format("\n");
             }
             writer.close();
         } catch (Exception e) {
