@@ -39,11 +39,12 @@ public class Download implements Runnable {
             writer = new PrintWriter(new OutputStreamWriter(new FileOutputStream(downloadWiki.getOutputFolderPath()+ "\\" + "T" + ID + ".txt", true), "UTF-8"));
 
             while ((s = downloadWiki.getLinks(500)) != null) {
-                System.out.println("T" + this.ID + " gets mode links "+s.size());
+                System.out.println("T" + this.ID + " gets more links "+s.size());
                 for (String link : s) {
                     downloadAndWriteText(link, writer);
                 }
             }
+            writer.close();
         } catch (Exception e) {
             e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
         }

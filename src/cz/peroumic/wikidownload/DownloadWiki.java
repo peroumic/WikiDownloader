@@ -2,6 +2,7 @@ package cz.peroumic.wikidownload;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -19,16 +20,37 @@ public class DownloadWiki {
     protected long bytes = 0;
     protected long readBytes = 0;
     protected String language = "cs";
+    protected List<File> files;
 
 
     public DownloadWiki(int threads, String inputFilePath,String language) throws FileNotFoundException {
         this.threads = threads;
-        this.localFile = new BufferedReader(new FileReader(inputFilePath));
-        File ff = new File(inputFilePath);
-        this.bytes = ff.length();
-        outputFolderPath = ff.getAbsolutePath();
-        outputFolderPath = outputFolderPath.substring(0,outputFolderPath.lastIndexOf('\\'));
-        File newFolder = new File(outputFolderPath+"\\"+language);
+
+        this.files = new ArrayList<File>();
+        File f = new File( inputFilePath );
+        if ( f . isDirectory() )
+        {
+            this.files = new ArrayList<File>(Arrays.asList(f.listFiles(new FileFilter() {
+                @Override
+                public boolean accept(File pathname) {
+                    return pathname.isFile();
+                }
+            })));
+        }
+        else
+        {
+            this.files = new ArrayList<File>();
+            this.files.add(new File ( inputFilePath ));
+        }
+        if ( this.files.size() > 0  ) {
+            this.localFile = new BufferedReader(new FileReader(this.files.get(this.files.size()-1).getAbsolutePath()));
+            this.outputFolderPath = this.files.get(this.files.size()-1).getAbsolutePath();
+        }
+        for ( File tmp : this.files )
+            this.bytes += tmp.length();
+
+        this.outputFolderPath = this.outputFolderPath.substring(0,this.outputFolderPath.lastIndexOf('\\'));
+        File newFolder = new File(this.outputFolderPath+"\\"+language);
         if(!newFolder.isFile()){
             newFolder.mkdir();
         }
@@ -40,35 +62,56 @@ public class DownloadWiki {
         return outputFolderPath;
     }
 
-
     public synchronized List<String> getLinks(int i) throws IOException {
-        String line = localFile.readLine();
-        this.readBytes += line.getBytes("UTF-8").length;
+        String line;
         List<String> list = new ArrayList<String>();
         int y = 0;
-        while (line != null && i != y) {
-            list.add(line);
+        while (i != y) {
             line = localFile.readLine();
-            this.readBytes += line.getBytes("UTF-8").length;
+            if ( line == null )
+            {
+                if ( this.files.size() <= 0 )
+                    break;
+                this.files.remove(this.files.size()-1);
+                if ( this.files.size() > 0 ) {
+                    localFile.close();
+                    localFile = new BufferedReader(new FileReader(this.files.get(this.files.size() - 1).getAbsolutePath()));
+                    line = localFile . readLine();
+                }
+            }
+            if ( line == null )
+                break;
+            list.add(line);
+            this.readBytes += line.getBytes("UTF-8").length + 2;
             y++;
         }
         if (list.size() == 0) {
             return null;
         }
         counter+=list.size();
-        //System.out.println(counter);
-        System.out.format("%d%% [%d/%d]\r\n", (this.readBytes / this.bytes), this.readBytes, this.bytes);
+        System.out.format("%d%% [%d/%d]\r\n", (int)(this.readBytes * 100 / (float)this.bytes), this.readBytes, this.bytes);
         return list;
     }
 
+    /**
+     * Merges all files present in the outputFolderPath directory
+     * to one file named <lang>.txt
+     *
+     * If <lang>.txt file is present in the directory, this method will append
+     * all content.
+     *
+     * @throws IOException
+     */
     private void mergeFiles() throws IOException
     {
+        File folder = new File ( getOutputFolderPath() );
+        File [] fp = folder.listFiles();
         File finalFile = new File ( getOutputFolderPath() + "\\" + this . language + ".txt" );
         FileOutputStream fos;
         try {
             fos = new FileOutputStream(finalFile, true);
-            for (int i = 0; i < threads; i++) {
-                File localFile = new File(getOutputFolderPath() + "\\" + "T" + i + ".txt");
+            for ( File localFile : fp )
+            {
                 FileInputStream fis = new FileInputStream(localFile);
                 byte[] buffer = new byte[8192];
                 int count;
@@ -76,15 +119,17 @@ public class DownloadWiki {
                     fos.write(buffer, 0, count);
                 fos.flush();
                 fis.close();
-                localFile . delete ();
+                localFile . delete();
             }
+            System.out.println("Files merged to " + finalFile . getName() );
+            fos . close ();
         } catch (Exception exception){
             exception.printStackTrace();
         }
     }
 
     public void start() throws IOException {
-        try {
+         try {
             List<Thread> threadPool = new ArrayList<Thread>();
             for (int i = 0; i < threads; i++) {
                 Thread t = new Thread(new Download(i, this));
