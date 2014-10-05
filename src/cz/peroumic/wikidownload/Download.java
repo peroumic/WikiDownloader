@@ -36,15 +36,17 @@ public class Download implements Runnable {
         System.out.println("T" + ID + " starts");
         List<String> s;
         PrintWriter writer;
+        boolean run = false;
         try {
             writer = new PrintWriter(new OutputStreamWriter(new FileOutputStream(downloadWiki.getOutputFolderPath()+ "\\" + "T" + ID + ".txt", true), "UTF-8"));
             while ((s = downloadWiki.getLinks(500)) != null) {
                 //System.out.println("T" + this.ID + " gets more links "+s.size());
+                run = true;
                 for (String link : s) {
                     downloadAndWriteText(link, writer);
-
-                    downloadWiki.setReadBytes( downloadWiki.getReadBytes() + link . getBytes( "UTF-8" ) . length + 2 );
-                    downloadWiki.setCounter(downloadWiki.getCounter() + 1);
+                    String g = "\r\n";
+                    downloadWiki.addReadBytes( link . getBytes() . length + g . getBytes() . length );
+                    downloadWiki.addCounter(1);
                     downloadWiki.printStats();
                 }
             }
@@ -52,6 +54,8 @@ public class Download implements Runnable {
         } catch (Exception e) {
             e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
         }
+        if ( run )
+            System.out.format("\n");
         System.out.println("T" + this.ID + " ends");
     }
 

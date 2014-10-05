@@ -66,13 +66,11 @@ public class DownloadWiki {
         return readBytes;
     }
 
-    public void setReadBytes(long readBytes) {
-        this.readBytes = readBytes;
+    public synchronized void addReadBytes(long readBytes) {
+        this.readBytes = readBytes + this.readBytes;
     }
 
-    public void setCounter(long counter) {
-        this.counter = counter;
-    }
+    public synchronized void addCounter(long counter) {this.counter = counter + this .counter;}
 
     public long getCounter() {
         return counter;
@@ -89,10 +87,10 @@ public class DownloadWiki {
     public void printStats(){
         double duration = getDuration();
         char mode = 's';
-        if ( duration/1000d > 300 && duration/1000d <= 900 ) {
+        if ( duration/1000d > 60 && duration/1000d <= 3600 ) {
             mode = 'm';
             duration /= 60;
-        } else if ( duration/1000d > 900 ) {
+        } else if ( duration/1000d > 3600 ) {
             duration /= 3600;
             mode = 'h';
         }
@@ -102,7 +100,8 @@ public class DownloadWiki {
                 this.bytes,
                 getSpeed()/1000d,
                 duration/1000d,
-                mode );
+                mode,
+                getCounter());
     }
 
 
