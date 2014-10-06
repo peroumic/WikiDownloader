@@ -79,7 +79,7 @@ public class DownloadWiki {
     }
 
     public double getSpeed () {
-        return (System.currentTimeMillis() - startTime)/getCounter();
+        return getCounter()/(System.currentTimeMillis() - startTime); 
     }
 
     public double getDuration () {
