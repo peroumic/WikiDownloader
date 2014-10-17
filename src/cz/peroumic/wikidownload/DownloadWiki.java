@@ -63,6 +63,9 @@ public class DownloadWiki {
     }
 
     public long getReadBytes() {
+        if(readBytes==0){
+            return 1;//because of division
+        }
         return readBytes;
     }
 
@@ -75,6 +78,9 @@ public class DownloadWiki {
     }
 
     public long getCounter() {
+        if(counter==0){
+            return 1;
+        }
         return counter;
     }
 
